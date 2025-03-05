@@ -3,7 +3,7 @@ entries:
   alloy:
   - apiVersion: v2
     appVersion: v1.7.0
-    created: "2025-03-05T19:12:03.285311+09:00"
+    created: "2025-03-06T01:15:52.615323+09:00"
     dependencies:
     - condition: crds.create
       name: crds
@@ -15,6 +15,6 @@ entries:
     name: alloy
     type: application
     urls:
-    - https://github.com/vegeterianlee/helm-chart-repo.git/grafana-alloy/alloy-0.12.0.tgz
+    - https://vegeterianlee.github.io/helm-chart-repo/grafana-alloy/alloy-0.12.0.tgz
     version: 0.12.0
-generated: "2025-03-05T19:12:03.283989+09:00"
+generated: "2025-03-06T01:15:52.613728+09:00"
