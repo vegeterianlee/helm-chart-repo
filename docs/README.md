@@ -22,4 +22,4 @@
       ``` bash
       helm repo index ./docs/grafana-alloy --url https://vegeterianlee.github.io/helm-chart-repo/grafana-alloy
       ```
-   - tgz 파일과 index.yaml 파일을 커밋합니다.
+   - tgz 파일과 index.yaml 파일을 커밋
