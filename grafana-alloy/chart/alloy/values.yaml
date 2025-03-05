@@ -1,0 +1,151 @@
+COMPUTED VALUES:
+alloy:
+  clustering:
+    enabled: false
+    name: ""
+    portName: http
+  configMap:
+    content: "logging {\n  level  = \"debug\"\n  format = \"logfmt\"\n}\n\ndiscovery.kubernetes
+      \"pods\" {\n  role = \"pod\"\n  selectors = [\n    {\n      namespace = \"check\",\n
+      \     label = \"app=dev-deploy\"\n    }\n  ]\n}\n\nloki.source.file \"app_logs\"
+      {\n  targets = discovery.kubernetes.pods.targets\n  include = [\"/app/logs/application*.log\"]\n
+      \ forward_to = [loki.process.process.receiver]\n}\n\nloki.process \"process\"
+      {\n  forward_to = [loki.write.loki.receiver]\n\n  stage.match { \n    selector
+      = \"{namespace=\\\"check\\\", app=\\\"dev-deploy\\\"}\"\n    stage.regex {\n
+      \     expression = \"(?P<timestamp>\\\\S+) (?P<level>\\\\S+) (?P<uuid>[a-zA-Z0-9-]+)
+      --- \\\\[(?P<thread>[^\\\\]]+)\\\\] (?P<logger>\\\\S+) : (?P<message>.*)\"\n
+      \   }\n    stage.labels {\n      values = {\n        level = \"level\",\n        logger
+      = \"logger\",\n        thread = \"thread\"\n      }\n    }\n  }\n\n  stage.label_drop
+      {\n    values = [\"job\", \"service_name\"]\n  }\n}\n\nloki.write \"loki\" {\n
+      \ endpoint {\n    url = \"http://loki-write:3100/loki/api/v1/push\"\n  }\n}"
+    create: true
+    key: config.alloy
+    name: alloy-dev
+  enableReporting: true
+  envFrom: []
+  extraArgs: []
+  extraEnv: []
+  extraPorts: []
+  hostAliases: []
+  labels:
+    environment: dev
+  lifecycle: {}
+  listenAddr: 0.0.0.0
+  listenPort: 12345
+  listenScheme: HTTP
+  mounts:
+    dockercontainers: false
+    extra: []
+    varlog: false
+  resources: {}
+  securityContext: {}
+  stabilityLevel: generally-available
+  storagePath: /tmp/alloy
+  uiPathPrefix: /
+configReloader:
+  customArgs: []
+  enabled: true
+  image:
+    digest: ""
+    registry: ghcr.io
+    repository: jimmidyson/configmap-reload
+    tag: v0.14.0
+  resources:
+    requests:
+      cpu: 1m
+      memory: 5Mi
+  securityContext: {}
+controller:
+  affinity: {}
+  autoscaling:
+    enabled: false
+    maxReplicas: 2
+    minReplicas: 1
+    scaleDown:
+      policies: []
+      selectPolicy: Max
+      stabilizationWindowSeconds: 300
+    scaleUp:
+      policies: []
+      selectPolicy: Max
+      stabilizationWindowSeconds: 0
+    targetCPUUtilizationPercentage: 0
+    targetMemoryUtilizationPercentage: 80
+  dnsPolicy: ClusterFirst
+  enableStatefulSetAutoDeletePVC: false
+  extraAnnotations: {}
+  extraContainers: []
+  hostNetwork: false
+  hostPID: false
+  initContainers: []
+  nodeSelector:
+    node-type: dev
+  parallelRollout: true
+  podAnnotations: {}
+  podDisruptionBudget:
+    enabled: false
+  podLabels:
+    environment: dev
+  priorityClassName: ""
+  replicas: 1
+  tolerations: []
+  topologySpreadConstraints: []
+  type: daemonset
+  updateStrategy: {}
+  volumeClaimTemplates: []
+  volumes:
+    extra: []
+crds:
+  create: true
+  global:
+    image:
+      pullSecrets: []
+      registry: ""
+    podSecurityContext: {}
+extraObjects: []
+global:
+  image:
+    pullSecrets: []
+    registry: ""
+  podSecurityContext: {}
+image:
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+  registry: docker.io
+  repository: grafana/alloy
+ingress:
+  annotations: {}
+  enabled: false
+  extraPaths: []
+  faroPort: 12347
+  hosts:
+  - chart-example.local
+  labels: {}
+  path: /
+  pathType: Prefix
+  tls: []
+labels:
+  environment: dev
+nameOverride: alloy-dev
+nodeSelector:
+  node-type: dev
+rbac:
+  create: true
+service:
+  annotations: {}
+  clusterIP: ""
+  enabled: true
+  internalTrafficPolicy: Cluster
+  nodePort: 31128
+  type: ClusterIP
+serviceAccount:
+  additionalLabels: {}
+  annotations: {}
+  create: true
+serviceMonitor:
+  additionalLabels: {}
+  enabled: false
+  interval: ""
+  metricRelabelings: []
+  relabelings: []
+  tlsConfig: {}

@@ -1,0 +1,20 @@
+apiVersion: v1
+entries:
+  alloy:
+  - apiVersion: v2
+    appVersion: v1.7.0
+    created: "2025-03-05T19:12:03.285311+09:00"
+    dependencies:
+    - condition: crds.create
+      name: crds
+      repository: ""
+      version: 0.0.0
+    description: Grafana Alloy
+    digest: a00d34d4c3c115b08e1aa865a082da353e2af8cf3c6c3999697912f253bdb433
+    icon: https://raw.githubusercontent.com/grafana/alloy/main/docs/sources/assets/alloy_icon_orange.svg
+    name: alloy
+    type: application
+    urls:
+    - https://github.com/vegeterianlee/helm-chart-repo.git/grafana-alloy/alloy-0.12.0.tgz
+    version: 0.12.0
+generated: "2025-03-05T19:12:03.283989+09:00"
