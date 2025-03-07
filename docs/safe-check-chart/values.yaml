@@ -1,0 +1,83 @@
+# 공통 값
+namespace: check
+environment: dev   # prod 배포 시 --set environment=prod 로 변경 가능
+
+deployment:
+  name:
+  replicas: 1
+  image:
+    repository: asia-docker.pkg.dev/safe-ai-430609/safecheck/server
+    tag: {{ .Values.environment }}
+    pullPolicy: Always
+  port: 8080
+  nodeSelector:
+    node-type: {{ .Values.environment }}
+  probes:
+    startup:
+      path: /agent/healthcheck
+      port: 8080
+      failureThreshold: 30
+      periodSeconds: 2
+    liveness:
+      path: /agent/healthcheck
+      port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 3
+    readiness:
+      path: /agent/healthcheck
+      port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 3
+  secretRef: safe-check-{{ .Values.environment }}-secret
+
+  env:
+    SPRING_ACTIVE_PROFILES: "{{ .Values.environment }}"
+
+pvc:
+  name: safe-check-data-{{ .Values.environment }}
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  storage: 1Gi
+
+redis:
+  statefulset:
+    name: redis-{{ .Values.environment }}
+    replicas: 1
+    image: redis:latest
+    port: 6379
+    nodeSelector:
+      node-type: {{ .Values.environment }}
+    probes:
+      startup:
+        command: ["sh", "-c", "redis-cli ping"]
+        failureThreshold: 30
+        periodSeconds: 2
+      liveness:
+        command: ["sh", "-c", "redis-cli ping"]
+        initialDelaySeconds: 5
+        periodSeconds: 5
+        failureThreshold: 3
+      readiness:
+        command: ["sh", "-c", "redis-cli ping"]
+        initialDelaySeconds: 10
+        periodSeconds: 5
+        failureThreshold: 3
+  pvc:
+    name: redis-data-{{ .Values.environment }}
+    storageClassName: standard
+    accessModes:
+      - ReadWriteOnce
+    storage: 1Gi
+
+redisService:
+  name: redis-{{ .Values.environment }}
+  port: 6379
+
+service:
+  name: safe-check-svc-{{ .Values.environment }}
+  type: ClusterIP
+  port: 5000
+  targetPort: 8080

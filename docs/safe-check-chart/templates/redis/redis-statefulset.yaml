@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.redis.statefulset.name }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app: {{ .Values.redis.statefulset.name }}
+spec:
+  serviceName: {{ .Values.redis.statefulset.name }}
+  replicas: {{ .Values.redis.statefulset.replicas }}
+  revisionHistoryLimit: 5
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  selector:
+    matchLabels:
+      app: {{ .Values.redis.statefulset.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.redis.statefulset.name }}
+    spec:
+      nodeSelector:
+{{ toYaml .Values.redis.statefulset.nodeSelector | indent 8 }}
+      containers:
+        - name: redis-{{ .Values.environment }}
+          image: {{ .Values.redis.statefulset.image }}
+          ports:
+            - containerPort: {{ .Values.redis.statefulset.port }}
+          startupProbe:
+            exec:
+              command: {{ toJson .Values.redis.statefulset.probes.startup.command }}
+            failureThreshold: {{ .Values.redis.statefulset.probes.startup.failureThreshold }}
+            periodSeconds: {{ .Values.redis.statefulset.probes.startup.periodSeconds }}
+          livenessProbe:
+            exec:
+              command: {{ toJson .Values.redis.statefulset.probes.liveness.command }}
+            initialDelaySeconds: {{ .Values.redis.statefulset.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.redis.statefulset.probes.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.redis.statefulset.probes.liveness.failureThreshold }}
+          readinessProbe:
+            exec:
+              command: {{ toJson .Values.redis.statefulset.probes.readiness.command }}
+            initialDelaySeconds: {{ .Values.redis.statefulset.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.redis.statefulset.probes.readiness.periodSeconds }}
+            failureThreshold: {{ .Values.redis.statefulset.probes.readiness.failureThreshold }}
+          volumeMounts:
+            - name: redis-data
+              mountPath: /var/lib/redis
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes:
+{{ toYaml .Values.redis.pvc.accessModes | indent 10 }}
+        storageClassName: {{ .Values.redis.pvc.storageClassName }}
+        resources:
+          requests:
+            storage: {{ .Values.redis.pvc.storage }}
